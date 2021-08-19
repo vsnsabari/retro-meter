@@ -2,6 +2,7 @@ package com.vsnsabari.retrometer.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -93,7 +94,7 @@ public class CommentControllerTest {
     void getBySessionId() {
         var testComment = getTestComments().get(0);
         Comment[] testComments = {testComment};
-        Mockito.when(service.getAllCommentBySessionId(any(UUID.class))).thenReturn(testComments);
+        Mockito.when(service.getAllCommentBySessionId(anyString())).thenReturn(testComments);
         mockMvc.perform(MockMvcRequestBuilders.get(String.format("/comment/getbysession/%s", testComment.getSessionId())))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -103,10 +104,9 @@ public class CommentControllerTest {
 
     private List<Comment> getTestComments() {
         var session = DummyFactory.getTestSession("commentController");
-        session.setSessionId(UUID.randomUUID());
+        session.setSessionId(UUID.randomUUID().toString());
         var comment = DummyFactory.getTestComment("commentController", session.getSessionId());
         comment.setId(1L);
-        comment.setCreatedDate(null);
         return Lists.list(comment);
     }
 }

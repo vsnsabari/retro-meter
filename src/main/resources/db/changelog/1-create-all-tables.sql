@@ -1,16 +1,16 @@
 CREATE TABLE SESSION (
-  session_id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+  session_id CHAR(36) NOT NULL PRIMARY KEY,
   started_by varchar(255) NOT NULL,
   team varchar(255) NOT NULL,
-  created_date DATETIME NOT NULL DEFAULT GETDATE()
+  created_date DATETIME NOT NULL
 );
 
 CREATE TABLE COMMENT (
   id bigint NOT NULL IDENTITY PRIMARY KEY,
-  session_id UNIQUEIDENTIFIER NOT NULL,
+  session_id CHAR(36) NOT NULL,
   comment_text varchar(MAX) NOT NULL,
-  up_votes int DEFAULT 0,
-  down_votes int DEFAULT 0,
-  created_date DATETIME NOT NULL DEFAULT GETDATE(),
-  CONSTRAINT fk_session_id FOREIGN KEY (session_id) REFERENCES SESSION (session_id),
+  up_votes int,
+  down_votes int,
+  created_date DATETIME NOT NULL,
+  CONSTRAINT fk_session_id FOREIGN KEY (session_id) REFERENCES SESSION (session_id)
 );

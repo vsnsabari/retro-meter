@@ -5,14 +5,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 @Data
 @AllArgsConstructor
@@ -25,9 +27,9 @@ public class Comment implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String commentText;
-    @GeneratedValue
-    private UUID sessionId;
-    private int upVotes;
-    private int downVotes;
-    private LocalDate createdDate;
+    private String sessionId;
+    private int upVotes = 0;
+    private int downVotes = 0;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private LocalDateTime createdDate = LocalDateTime.now();
 }

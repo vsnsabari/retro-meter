@@ -7,7 +7,7 @@
         logicalFilePath="src/main/resources/db/chagelog/budgetme-changelog.xml">
 
     <changeSet author="vsnsabari" id="1">
-        <sqlFile path="classpath:db/changelog/1-create-all-tables.sql" relativeToChangelogFile="false" dbms="MSSQL" />
+        <sqlFile path="classpath:db/changelog/1-create-all-tables.sql" relativeToChangelogFile="false" dbms="mssql" />
     </changeSet>
 
     <changeSet author="vsnsabari" id="1h2">

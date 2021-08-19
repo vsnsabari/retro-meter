@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -42,11 +41,6 @@ public class SessionControllerTest {
 
     private static final JsonMapper JSON_MAPPER = new JsonMapper();
 
-    @BeforeAll
-    public static void setup() {
-        JSON_MAPPER.findAndRegisterModules();
-    }
-
     @Test
     @SneakyThrows
     void createSession() {
@@ -63,17 +57,17 @@ public class SessionControllerTest {
     @Test
     @SneakyThrows
     void getByDate() {
-        Mockito.when(service.getAllSessionByCreatedDate(LocalDate.now())).thenReturn(getTestSessions());
+        var sessions = getTestSessions();
+        Mockito.when(service.getAllSessionByCreatedDate(LocalDate.now())).thenReturn(sessions);
         var date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         mockMvc.perform(MockMvcRequestBuilders.get(String.format("/session/getbydate/%s", date)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(JSON_MAPPER.writeValueAsString(getTestSessions())));
+                .andExpect(content().json(JSON_MAPPER.writeValueAsString(sessions)));
     }
 
     private Session[] getTestSessions() {
         var session = DummyFactory.getTestSession("sessionController");
-        session.setCreatedDate(null);
         return new Session[]{session};
     }
 }

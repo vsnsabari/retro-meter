@@ -1,7 +1,6 @@
 package com.vsnsabari.retrometer;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 import com.vsnsabari.retrometer.entities.Comment;
 import com.vsnsabari.retrometer.entities.Session;
@@ -12,14 +11,14 @@ public class DummyFactory {
         return Session.builder()
                 .team("TEAM-1")
                 .startedBy(name)
-                .createdDate(LocalDate.now())
+                .createdDate(LocalDateTime.now())
                 .build();
     }
 
-    public static Comment getTestComment(String name, UUID sessionId) {
+    public static Comment getTestComment(String name, String sessionId) {
         return Comment.builder()
                 .commentText(name)
-                .createdDate(LocalDate.now())
+                .createdDate(LocalDateTime.now())
                 .sessionId(sessionId)
                 .downVotes(0)
                 .upVotes(0)

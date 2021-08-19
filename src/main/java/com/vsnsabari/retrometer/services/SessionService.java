@@ -35,8 +35,8 @@ public class SessionService {
     }
 
     public Session[] getAllSessionByCreatedDate(LocalDate date) {
-        var from = date.atTime(0, 0, 0).toLocalDate();
-        var to = date.atTime(23, 59, 59).toLocalDate();
+        var from = date.atTime(0, 0, 0);
+        var to = date.atTime(23, 59, 59);
         return StreamSupport.stream(sessionRepository.getByCreatedDateBetween(from, to).spliterator(), false)
                 .toArray(Session[]::new);
     }

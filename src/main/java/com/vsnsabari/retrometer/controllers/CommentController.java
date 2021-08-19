@@ -1,7 +1,6 @@
 package com.vsnsabari.retrometer.controllers;
 
 import javax.transaction.Transactional;
-import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -66,7 +65,7 @@ public class CommentController {
     }
 
     @GetMapping("getbysession/{sessionId}")
-    public ResponseEntity<Object> getBySessionId(@PathVariable("sessionId") UUID sessionId) {
+    public ResponseEntity<Object> getBySessionId(@PathVariable("sessionId") String sessionId) {
         log.info("Received Request to get comments by session {}", sessionId);
         return new ResponseEntity<>(commentService.getAllCommentBySessionId(sessionId), HttpStatus.OK);
     }

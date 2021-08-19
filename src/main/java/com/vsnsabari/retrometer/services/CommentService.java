@@ -1,6 +1,5 @@
 package com.vsnsabari.retrometer.services;
 
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class CommentService {
                 new CommentNotFoundException(String.format("No Comment found with id : %d", commentId)));
     }
 
-    public Comment[] getAllCommentBySessionId(UUID sessionId) {
+    public Comment[] getAllCommentBySessionId(String sessionId) {
         return StreamSupport.stream(commentRepository.getBySessionId(sessionId).spliterator(), false)
                 .toArray(Comment[]::new);
     }
