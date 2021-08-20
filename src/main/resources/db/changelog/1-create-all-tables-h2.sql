@@ -9,6 +9,7 @@ CREATE TABLE `COMMENT` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `session_id` CHAR(36) NOT NULL,
   `comment_text` varchar(MAX) NOT NULL,
+  `comment_type` char(1) NOT NULL,
   `up_votes` int DEFAULT 0,
   `down_votes` int DEFAULT 0,
   `created_date` DATETIME NOT NULL,

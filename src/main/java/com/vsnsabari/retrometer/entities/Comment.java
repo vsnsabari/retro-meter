@@ -1,5 +1,6 @@
 package com.vsnsabari.retrometer.entities;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +16,8 @@ import lombok.ToString;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.vsnsabari.retrometer.converters.CommentTypeConverter;
+import com.vsnsabari.retrometer.models.CommentType;
 
 @Data
 @AllArgsConstructor
@@ -28,6 +31,8 @@ public class Comment implements Serializable {
     private long id;
     private String commentText;
     private String sessionId;
+    @Convert(converter = CommentTypeConverter.class)
+    private CommentType commentType;
     private int upVotes = 0;
     private int downVotes = 0;
     @JsonSerialize(using = ToStringSerializer.class)
