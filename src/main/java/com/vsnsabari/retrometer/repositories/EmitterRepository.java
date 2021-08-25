@@ -12,4 +12,6 @@ public interface EmitterRepository {
     void remove(Member member);
 
     Optional<SseEmitter> get(Member member);
+
+    Optional<SseEmitter[]> getBySessionExcludingCurrentClient(String session, String clientId);
 }

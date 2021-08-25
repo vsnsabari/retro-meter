@@ -31,6 +31,7 @@ public class Comment implements Serializable {
     private long id;
     private String commentText;
     private String sessionId;
+    private String addedBy;
     @Convert(converter = CommentTypeConverter.class)
     private CommentType commentType;
     private int upVotes = 0;

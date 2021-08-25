@@ -1,6 +1,5 @@
 package com.vsnsabari.retrometer.controllers;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vsnsabari.retrometer.entities.Session;
 import com.vsnsabari.retrometer.exceptions.SessionCreationException;
+import com.vsnsabari.retrometer.exceptions.SessionNotFoundException;
 import com.vsnsabari.retrometer.services.SessionService;
 
 @RestController
 @RequestMapping("session")
 @Slf4j
-@Transactional
 public class SessionController {
 
     private final SessionService sessionService;
@@ -46,5 +45,16 @@ public class SessionController {
                                                           @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         log.info("Received Request to getByDate {}", date);
         return new ResponseEntity<>(sessionService.getAllSessionByCreatedDate(date), HttpStatus.OK);
+    }
+
+    @RequestMapping("getbyid/{id}")
+    public ResponseEntity<Object> getById(@PathVariable("id")String sessionId) {
+        try {
+            log.info("Received Request to getById {}", sessionId);
+            return new ResponseEntity<>(sessionService.getBySessionId(sessionId), HttpStatus.OK);
+        } catch (SessionNotFoundException ex) {
+            log.error("Error processing request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
     }
 }

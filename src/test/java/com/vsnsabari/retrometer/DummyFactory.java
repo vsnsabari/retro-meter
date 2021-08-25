@@ -21,6 +21,7 @@ public class DummyFactory {
                 .commentText(name)
                 .createdDate(LocalDateTime.now())
                 .sessionId(sessionId)
+                .addedBy(name)
                 .commentType(CommentType.GOOD)
                 .downVotes(0)
                 .upVotes(0)

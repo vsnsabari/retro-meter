@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.vsnsabari.retrometer.entities.Session;
 import com.vsnsabari.retrometer.exceptions.SessionCreationException;
+import com.vsnsabari.retrometer.exceptions.SessionNotFoundException;
 import com.vsnsabari.retrometer.repositories.SessionRepository;
 
 @Service
@@ -32,6 +33,10 @@ public class SessionService {
     public Session[] getAllSession() {
         return StreamSupport.stream(sessionRepository.findAll().spliterator(), false)
                 .toArray(Session[]::new);
+    }
+
+    public Session getBySessionId(String sessionId) {
+        return sessionRepository.findById(sessionId).orElseThrow(()-> new SessionNotFoundException(sessionId));
     }
 
     public Session[] getAllSessionByCreatedDate(LocalDate date) {

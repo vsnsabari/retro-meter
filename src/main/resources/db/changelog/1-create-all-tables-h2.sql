@@ -8,6 +8,7 @@ CREATE TABLE `SESSION` (
 CREATE TABLE `COMMENT` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `session_id` CHAR(36) NOT NULL,
+  `added_by` varchar(255) NOT NULL,
   `comment_text` varchar(MAX) NOT NULL,
   `comment_type` char(1) NOT NULL,
   `up_votes` int DEFAULT 0,

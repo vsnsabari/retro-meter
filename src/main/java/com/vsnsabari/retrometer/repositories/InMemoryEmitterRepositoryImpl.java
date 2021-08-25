@@ -1,8 +1,10 @@
 package com.vsnsabari.retrometer.repositories;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -34,5 +36,12 @@ public class InMemoryEmitterRepositoryImpl implements EmitterRepository {
     @Override
     public Optional<SseEmitter> get(Member member) {
         return Optional.ofNullable(userEmitterMap.get(member));
+    }
+
+    @Override
+    public Optional<SseEmitter[]> getBySessionExcludingCurrentClient(String session, String clientId) {
+        return Optional.of(userEmitterMap.keySet().stream()
+                .filter(x -> x.getSessionId().equals(session) && !x.getClientId().equals(clientId))
+                .map(userEmitterMap::get).toArray(SseEmitter[]::new));
     }
 }

@@ -14,6 +14,7 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -29,7 +30,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.vsnsabari.retrometer.DummyFactory;
 import com.vsnsabari.retrometer.config.WebSecurityConfig;
 import com.vsnsabari.retrometer.entities.Comment;
+import com.vsnsabari.retrometer.models.EventDto;
+import com.vsnsabari.retrometer.models.Member;
 import com.vsnsabari.retrometer.services.CommentService;
+import com.vsnsabari.retrometer.services.NotificationService;
 
 @WebMvcTest(CommentController.class)
 @Import(WebSecurityConfig.class)
@@ -41,6 +45,9 @@ public class CommentControllerTest {
     @MockBean
     private CommentService service;
 
+    @MockBean
+    private NotificationService notificationService;
+
     @InjectMocks
     private CommentController controller;
 
@@ -51,12 +58,18 @@ public class CommentControllerTest {
         JSON_MAPPER.findAndRegisterModules();
     }
 
+    @BeforeEach
+    public void testSetup() {
+        Mockito.doNothing().when(notificationService).sendNotification(any(Member.class), any(EventDto.class));
+    }
+
     @Test
     @SneakyThrows
     void addComment() {
         Comment testComment = getTestComments().get(0);
-        Mockito.when(service.addComment(any())).thenReturn(testComment);
+        Mockito.when(service.addComment(any(), anyString())).thenReturn(testComment);
         mockMvc.perform(MockMvcRequestBuilders.put("/comment/add")
+                .header("X-Client-Id", "client1")
                 .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -68,8 +81,9 @@ public class CommentControllerTest {
     void addUpVote() {
         Comment testComment = getTestComments().get(0);
         Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
-        Mockito.when(service.addUpVote(anyLong())).thenReturn(testComment);
+        Mockito.when(service.addUpVote(anyLong(), anyString())).thenReturn(testComment);
         mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/upvote/%s", testComment.getId()))
+                .header("X-Client-Id", "client1")
                 .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -81,12 +95,39 @@ public class CommentControllerTest {
     void addDownVote() {
         Comment testComment = getTestComments().get(0);
         Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
-        Mockito.when(service.addDownVote(anyLong())).thenReturn(testComment);
+        Mockito.when(service.addDownVote(anyLong(), anyString())).thenReturn(testComment);
         mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/downvote/%s", testComment.getId()))
+                .header("X-Client-Id", "client1")
                 .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(JSON_MAPPER.writeValueAsString(testComment)));
+    }
+
+    @Test
+    @SneakyThrows
+    void editComment() {
+        Comment testComment = getTestComments().get(0);
+        Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
+        Mockito.when(service.editComment(anyLong(), anyString(), anyString())).thenReturn(testComment);
+        mockMvc.perform(MockMvcRequestBuilders.post("/comment/edit", testComment)
+                .header("X-Client-Id", "client1")
+                .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JSON_MAPPER.writeValueAsString(testComment)));
+    }
+
+    @Test
+    @SneakyThrows
+    void deleteComment() {
+        Comment testComment = getTestComments().get(0);
+        Mockito.doNothing().when(service).deleteComment(anyLong(), anyString());
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/delete/%s", testComment.getId()))
+                .header("X-Client-Id", "client1")
+                .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test

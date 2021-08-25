@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.vsnsabari.retrometer.DummyFactory;
 import com.vsnsabari.retrometer.exceptions.CommentCreationException;
@@ -26,7 +27,8 @@ import com.vsnsabari.retrometer.repositories.CommentRepository;
 
 @Transactional
 @DataJpaTest
-@Import({CommentService.class, SessionService.class})
+@ActiveProfiles("test")
+@Import({CommentService.class, SessionService.class, MockNotificationServiceImpl.class})
 public class CommentServiceTest {
 
     @Autowired
@@ -42,7 +44,7 @@ public class CommentServiceTest {
     void addComment() {
         var session = sessionService.createSession(DummyFactory.getTestSession("addComment"));
         var testComment = DummyFactory.getTestComment("addComment", session.getSessionId());
-        var comment = service.addComment(testComment);
+        var comment = service.addComment(testComment, "client1");
         assertNotNull(comment);
         MatcherAssert.assertThat(comment, samePropertyValuesAs(testComment));
     }
@@ -51,7 +53,7 @@ public class CommentServiceTest {
     void getAllCommentBySessionId() {
         var session = sessionService.createSession(DummyFactory.getTestSession("getAllCommentBySessionId"));
         var testComment = DummyFactory.getTestComment("getAllCommentBySessionId", session.getSessionId());
-        service.addComment(testComment);
+        service.addComment(testComment, "client1");
         var comments = service.getAllCommentBySessionId(testComment.getSessionId());
         assertNotNull(comments);
         assertThat(Arrays.stream(comments).collect(Collectors.toList()), hasSize(1));
@@ -62,7 +64,7 @@ public class CommentServiceTest {
     void editComment() {
         var session = sessionService.createSession(DummyFactory.getTestSession("editComment"));
         var testComment = DummyFactory.getTestComment("editComment", session.getSessionId());
-        var comment = service.addComment(testComment);
+        var comment = service.addComment(testComment, "client1");
         comment.setUpVotes(15);
         comment.setDownVotes(17);
         comment = service.editComment(comment);
@@ -72,11 +74,31 @@ public class CommentServiceTest {
     }
 
     @Test
+    void deleteComment() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("editComment"));
+        var testComment = DummyFactory.getTestComment("deleteComment", session.getSessionId());
+        var comment = service.addComment(testComment, "client1");
+        service.deleteComment(comment.getId(), "client1");
+        assertThrows(CommentNotFoundException.class, () -> service.getComment(comment.getId()));
+    }
+
+    @Test
+    void editCommentOnlyComment() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("editCommentOnlyComment"));
+        var testComment = DummyFactory.getTestComment("editCommentOnlyComment", session.getSessionId());
+        var comment = service.addComment(testComment, "client1");
+        comment.setCommentText("new comment");
+        comment = service.editComment(comment);
+        assertNotNull(comment);
+        MatcherAssert.assertThat(comment, Matchers.hasProperty("commentText", equalTo("new comment")));
+    }
+
+    @Test
     void addUpVote() {
         var session = sessionService.createSession(DummyFactory.getTestSession("addUpVote"));
         var testComment = DummyFactory.getTestComment("addUpVote", session.getSessionId());
-        var comment = service.addComment(testComment);
-        comment = service.addUpVote(testComment.getId());
+        var comment = service.addComment(testComment, "client1");
+        comment = service.addUpVote(testComment.getId(), "client1");
         assertNotNull(comment);
         MatcherAssert.assertThat(comment, Matchers.hasProperty("upVotes", equalTo(1)));
     }
@@ -85,8 +107,8 @@ public class CommentServiceTest {
     void addDownVote() {
         var session = sessionService.createSession(DummyFactory.getTestSession("addDownVote"));
         var testComment = DummyFactory.getTestComment("addDownVote", session.getSessionId());
-        var comment = service.addComment(testComment);
-        comment = service.addDownVote(testComment.getId());
+        var comment = service.addComment(testComment, "client1");
+        comment = service.addDownVote(testComment.getId(), "client1");
         assertNotNull(comment);
         MatcherAssert.assertThat(comment, Matchers.hasProperty("downVotes", equalTo(1)));
     }
@@ -96,7 +118,7 @@ public class CommentServiceTest {
         var session = sessionService.createSession(DummyFactory.getTestSession("CreationException"));
         var testComment = DummyFactory.getTestComment("CreationException", session.getSessionId());
         testComment.setSessionId(null);
-        assertThrows(CommentCreationException.class, () -> service.addComment(testComment));
+        assertThrows(CommentCreationException.class, () -> service.addComment(testComment, "client1"));
     }
 
     @Test

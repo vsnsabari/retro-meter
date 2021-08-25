@@ -1,12 +1,15 @@
 package com.vsnsabari.retrometer.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.UUID;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -64,6 +67,17 @@ public class SessionControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(JSON_MAPPER.writeValueAsString(sessions)));
+    }
+
+    @Test
+    @SneakyThrows
+    void getById() {
+        var session = Arrays.stream(getTestSessions()).findFirst().get();
+        Mockito.when(service.getBySessionId(anyString())).thenReturn(session);
+        mockMvc.perform(MockMvcRequestBuilders.get(String.format("/session/getbyid/%s", UUID.randomUUID().toString())))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JSON_MAPPER.writeValueAsString(session)));
     }
 
     private Session[] getTestSessions() {

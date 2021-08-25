@@ -1,9 +1,12 @@
 package com.vsnsabari.retrometer.services;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import com.vsnsabari.retrometer.models.EventDto;
@@ -14,6 +17,8 @@ import com.vsnsabari.retrometer.models.Member;
 public class NotificationServiceImpl implements NotificationService {
 
     private final EmitterService emitterService;
+    private final ExecutorService nonBlockingService = Executors
+            .newCachedThreadPool();
 
     @Autowired
     public NotificationServiceImpl(EmitterService emitterService) {
@@ -30,14 +35,18 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void doSendNotification(Member member, EventDto event) {
-        emitterService.getEmitter(member).ifPresentOrElse(sseEmitter -> {
-            try {
-                log.debug("Sending event: {} for member: {}", event, member);
-                sseEmitter.send(new EventDto("New Message"));
-            } catch (IOException | IllegalStateException e) {
-                log.debug("Error while sending event: {} for member: {} - exception: {}", event, member, e);
-                emitterService.removeEmitter(member);
-            }
+        emitterService.getEmitters(member).ifPresentOrElse(sseEmitters -> {
+            nonBlockingService.execute(() -> {
+                try {
+                    log.debug("Sending event: {} for member: {}", event, member);
+                    for (var emitter : sseEmitters) {
+                        emitter.send(event, MediaType.APPLICATION_JSON);
+                    }
+                } catch (IOException | IllegalStateException e) {
+                    log.debug("Error while sending event: {} for member: {} - exception: {}", event, member, e);
+                    emitterService.removeEmitter(member);
+                }
+            });
         }, () -> log.error("No emitter for member {}", member));
     }
 }

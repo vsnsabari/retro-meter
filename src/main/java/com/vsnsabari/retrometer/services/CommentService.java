@@ -8,21 +8,29 @@ import com.vsnsabari.retrometer.entities.Comment;
 import com.vsnsabari.retrometer.exceptions.CommentCreationException;
 import com.vsnsabari.retrometer.exceptions.CommentEditException;
 import com.vsnsabari.retrometer.exceptions.CommentNotFoundException;
+import com.vsnsabari.retrometer.models.EventDto;
+import com.vsnsabari.retrometer.models.EventType;
+import com.vsnsabari.retrometer.models.Member;
 import com.vsnsabari.retrometer.repositories.CommentRepository;
 
 @Service
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
-    public CommentService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository, NotificationService notificationService) {
 
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
-    public Comment addComment(Comment comment) {
+    public Comment addComment(Comment comment, String clientId) {
         try {
-            return commentRepository.save(comment);
+            var commentAdded = commentRepository.save(comment);
+            notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
+                    new EventDto(EventType.ADDED, commentAdded));
+            return commentAdded;
         } catch (Exception ex) {
             throw new CommentCreationException(ex);
         }
@@ -30,7 +38,7 @@ public class CommentService {
 
     public Comment getComment(long commentId) {
         return commentRepository.findById(commentId).orElseThrow(() ->
-                new CommentNotFoundException(String.format("No Comment found with id : %d", commentId)));
+                new CommentNotFoundException(commentId));
     }
 
     public Comment[] getAllCommentBySessionId(String sessionId) {
@@ -46,15 +54,45 @@ public class CommentService {
         }
     }
 
-    public Comment addUpVote(long commentId) {
-        var comment = getComment(commentId);
-        comment.setUpVotes(comment.getUpVotes() + 1);
-        return editComment(comment);
+    public Comment editComment(long commentId, String clientId, String comment) {
+        try {
+            var currentComment = getComment(commentId);
+            currentComment.setCommentText(comment);
+            var editedComment = commentRepository.save(currentComment);
+            notificationService.sendNotification(new Member(currentComment.getSessionId(), clientId),
+                    new EventDto(EventType.EDITED, editedComment));
+            return editedComment;
+        } catch (Exception ex) {
+            throw new CommentEditException(ex);
+        }
     }
 
-    public Comment addDownVote(long commentId) {
+    public void deleteComment(long commentId, String clientId) {
+        try {
+            var comment = getComment(commentId);
+            commentRepository.deleteById(commentId);
+            notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
+                    new EventDto(EventType.REMOVED, comment));
+        } catch (Exception ex) {
+            throw new CommentNotFoundException(commentId);
+        }
+    }
+
+    public Comment addUpVote(long commentId, String clientId) {
+        var comment = getComment(commentId);
+        comment.setUpVotes(comment.getUpVotes() + 1);
+        var editedComment = editComment(comment);
+        notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
+                new EventDto(EventType.EDITED, editedComment));
+        return editedComment;
+    }
+
+    public Comment addDownVote(long commentId, String clientId) {
         var comment = getComment(commentId);
         comment.setDownVotes(comment.getDownVotes() + 1);
-        return editComment(comment);
+        var editedComment = editComment(comment);
+        notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
+                new EventDto(EventType.EDITED, editedComment));
+        return editedComment;
     }
 }

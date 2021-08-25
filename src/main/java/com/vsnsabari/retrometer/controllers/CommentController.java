@@ -1,7 +1,5 @@
 package com.vsnsabari.retrometer.controllers;
 
-import javax.transaction.Transactional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +20,6 @@ import com.vsnsabari.retrometer.services.CommentService;
 @RestController
 @RequestMapping("comment")
 @Slf4j
-@Transactional
 public class CommentController {
 
     private final CommentService commentService;
@@ -32,21 +30,49 @@ public class CommentController {
     }
 
     @PutMapping("add")
-    public ResponseEntity<Object> addComment(@RequestBody Comment comment) {
+    public ResponseEntity<Object> addComment(@RequestHeader(value = "X-Client-Id") String clientId,
+                                             @RequestBody Comment comment) {
         try {
-            log.info("Received Request to create comment {}", comment);
-            return new ResponseEntity<>(commentService.addComment(comment), HttpStatus.CREATED);
+            log.info("Received Request to create comment {} by client {}", comment , clientId);
+            return new ResponseEntity<>(commentService.addComment(comment, clientId), HttpStatus.CREATED);
         } catch (Exception ex) {
             log.error("Error processing request : {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
 
-    @PostMapping("upvote/{commentId}")
-    public synchronized ResponseEntity<Object> addUpVote(@PathVariable("commentId") int commentId) {
+    @PostMapping("edit")
+    public synchronized ResponseEntity<Object> editComment(@RequestHeader(value = "X-Client-Id") String clientId,
+                                                           @RequestBody Comment comment) {
         try {
-            log.info("Received Request to up vote {}", commentId);
-            return new ResponseEntity<>(commentService.addUpVote(commentId), HttpStatus.OK);
+            log.info("Received Request to edit comment {} by client {}", comment, clientId);
+            return new ResponseEntity<>(commentService.editComment(comment.getId(), clientId, comment.getCommentText()),
+                    HttpStatus.OK);
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing upvote request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("delete/{id}")
+    public synchronized ResponseEntity<Object> deleteComment(@RequestHeader(value = "X-Client-Id") String clientId,
+                                                             @PathVariable("id") long commentId) {
+        try {
+            log.info("Received Request to delete comment {} by client {}", commentId, clientId);
+            commentService.deleteComment(commentId, clientId);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing upvote request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("upvote/{commentId}")
+    public synchronized ResponseEntity<Object> addUpVote(@RequestHeader(value = "X-Client-Id") String clientId,
+                                                         @PathVariable("commentId") int commentId) {
+        try {
+            log.info("Received Request to up vote comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addUpVote(commentId, clientId), HttpStatus.OK);
         } catch (CommentNotFoundException | CommentEditException ex) {
             log.error("Error processing upvote request : {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
@@ -54,10 +80,11 @@ public class CommentController {
     }
 
     @PostMapping("downvote/{commentId}")
-    public synchronized ResponseEntity<Object> addDownVote(@PathVariable("commentId") int commentId) {
+    public synchronized ResponseEntity<Object> addDownVote(@RequestHeader(value = "X-Client-Id") String clientId,
+                                                           @PathVariable("commentId") int commentId) {
         try {
-            log.info("Received Request to down vote {}", commentId);
-            return new ResponseEntity<>(commentService.addDownVote(commentId), HttpStatus.OK);
+            log.info("Received Request to down vote comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addDownVote(commentId, clientId), HttpStatus.OK);
         } catch (CommentNotFoundException | CommentEditException ex) {
             log.error("Error processing upvote request : {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());

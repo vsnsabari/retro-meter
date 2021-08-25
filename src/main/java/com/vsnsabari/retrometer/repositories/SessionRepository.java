@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.vsnsabari.retrometer.entities.Session;
 
-public interface SessionRepository extends CrudRepository<Session, UUID> {
+public interface SessionRepository extends CrudRepository<Session, String> {
 
     Iterable<Session> getByCreatedDateBetween(LocalDateTime from, LocalDateTime to);
 }

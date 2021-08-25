@@ -19,7 +19,7 @@ public class EmitterService {
     private final EmitterRepository repository;
 
     @Autowired
-    private EmitterService(@Value("${events.connection.timeout:60000}") long eventsTimeout,
+    private EmitterService(@Value("${events.connection.timeout:3600000}") long eventsTimeout,
                            EmitterRepository repository) {
 
         this.eventsTimeout = eventsTimeout;
@@ -40,6 +40,10 @@ public class EmitterService {
 
     public Optional<SseEmitter> getEmitter(Member member) {
         return repository.get(member);
+    }
+
+    public Optional<SseEmitter[]> getEmitters(Member member) {
+        return repository.getBySessionExcludingCurrentClient(member.getSessionId(), member.getClientId());
     }
 
     public void removeEmitter(Member member) {

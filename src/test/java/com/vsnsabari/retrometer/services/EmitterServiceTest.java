@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.vsnsabari.retrometer.models.Member;
@@ -17,6 +18,7 @@ import com.vsnsabari.retrometer.repositories.EmitterRepository;
 import com.vsnsabari.retrometer.repositories.InMemoryEmitterRepositoryImpl;
 
 @DataJpaTest
+@ActiveProfiles("test")
 @Import({EmitterService.class, InMemoryEmitterRepositoryImpl.class})
 public class EmitterServiceTest {
 
