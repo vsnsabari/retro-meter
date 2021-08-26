@@ -28,9 +28,10 @@ public class FeedController {
     public SseEmitter subscribe(@PathVariable("id") String id) {
         SseEmitter emitter = null;
         try {
-            log.info("subscription added for id {}", id);
             var ids = id.split("_");
-            emitter = emitterService.createEmitter(new Member(ids[0], ids[1]));
+            var member = new Member(ids[0], ids[1]);
+            emitter = emitterService.createEmitter(member);
+            log.info("subscription added for member {}", member);
             emitter.send(SseEmitter.event().name("INIT"));
         } catch (Exception ex) {
             log.error(ex.getMessage());
