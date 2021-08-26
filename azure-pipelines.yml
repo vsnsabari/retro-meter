@@ -23,7 +23,7 @@ steps:
     
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Agent.BuildDirectory)/target'
+    SourceFolder: '$(System.DefaultWorkingDirectory)/target'
     Contents: '*.jar'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
