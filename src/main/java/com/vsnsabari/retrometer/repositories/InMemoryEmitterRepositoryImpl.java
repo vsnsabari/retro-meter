@@ -39,9 +39,12 @@ public class InMemoryEmitterRepositoryImpl implements EmitterRepository {
     }
 
     @Override
-    public Optional<SseEmitter[]> getBySessionExcludingCurrentClient(String session, String clientId) {
-        return Optional.of(userEmitterMap.keySet().stream()
-                .filter(x -> x.getSessionId().equals(session) && !x.getClientId().equals(clientId))
-                .map(userEmitterMap::get).toArray(SseEmitter[]::new));
+    public Optional<Map<Member, SseEmitter>> getBySessionExcludingCurrentClient(String session, String clientId) {
+//        return Optional.of(userEmitterMap.keySet().stream()
+//                .filter(x -> x.getSessionId().equals(session) && !x.getClientId().equals(clientId))
+//                .map(userEmitterMap::get).toArray(SseEmitter[]::new));
+        return Optional.of(userEmitterMap.entrySet().stream()
+                .filter(m -> m.getKey().getSessionId().equals(session) && !m.getKey().getClientId().equals(clientId))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 }

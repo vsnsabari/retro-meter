@@ -1,5 +1,6 @@
 package com.vsnsabari.retrometer.services;
 
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +43,11 @@ public class EmitterService {
         return repository.get(member);
     }
 
-    public Optional<SseEmitter[]> getEmitters(Member member) {
-        return repository.getBySessionExcludingCurrentClient(member.getSessionId(), member.getClientId());
-    }
-
     public void removeEmitter(Member member) {
         repository.remove(member);
+    }
+
+    public Optional<Map<Member, SseEmitter>> getEmitters(Member member) {
+        return repository.getBySessionExcludingCurrentClient(member.getSessionId(), member.getClientId());
     }
 }

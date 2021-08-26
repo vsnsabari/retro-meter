@@ -1,5 +1,6 @@
 package com.vsnsabari.retrometer.repositories;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -13,5 +14,5 @@ public interface EmitterRepository {
 
     Optional<SseEmitter> get(Member member);
 
-    Optional<SseEmitter[]> getBySessionExcludingCurrentClient(String session, String clientId);
+    Optional<Map<Member, SseEmitter>> getBySessionExcludingCurrentClient(String session, String clientId);
 }

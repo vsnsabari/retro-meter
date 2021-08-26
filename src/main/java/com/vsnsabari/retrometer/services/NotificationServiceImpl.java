@@ -28,25 +28,23 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotification(Member member, EventDto event) {
         if (event == null) {
-            log.debug("No server event to send to device.");
+            log.debug("No server event to send");
             return;
         }
         doSendNotification(member, event);
     }
 
     private void doSendNotification(Member member, EventDto event) {
-        emitterService.getEmitters(member).ifPresentOrElse(sseEmitters -> {
-            nonBlockingService.execute(() -> {
-                try {
-                    log.debug("Sending event: {} for member: {}", event, member);
-                    for (var emitter : sseEmitters) {
-                        emitter.send(event, MediaType.APPLICATION_JSON);
-                    }
-                } catch (IOException | IllegalStateException e) {
-                    log.debug("Error while sending event: {} for member: {} - exception: {}", event, member, e);
-                    emitterService.removeEmitter(member);
+        nonBlockingService.execute(() -> emitterService.getEmitters(member).ifPresentOrElse(sseEmitters -> {
+            try {
+                for (var emitterSet : sseEmitters.entrySet()) {
+                    log.info("Sending event: {} to member: {}", event, emitterSet.getKey());
+                    emitterSet.getValue().send(event, MediaType.APPLICATION_JSON);
                 }
-            });
-        }, () -> log.error("No emitter for member {}", member));
+            } catch (IOException | IllegalStateException e) {
+                log.error("Error while sending event: {} for member: {} - exception: {}", event, member, e);
+                emitterService.removeEmitter(member);
+            }
+        }, () -> log.error("No emitter for member {}", member)));
     }
 }
