@@ -3,6 +3,10 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
+parameters:
+  - name: commands
+    type: object
+    default: [key1=value1,key2=value2]
 
 
 trigger:
@@ -16,6 +20,4 @@ pool:
 jobs:
   - template: test-template.yml
     parameters:
-      commands:
-        - script: echo hellp from step
-        - script: echo 1
+      commands: ${{ parameters.commands }}
