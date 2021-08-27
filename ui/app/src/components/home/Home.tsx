@@ -76,7 +76,7 @@ const Home: React.FC<Props> = (props) => {
     return (
         <Container className={props.classes.container}>
             <Typography variant="h6">Welcome to Retro Meter</Typography>
-            <Typography variant="h6">Please choose New Session to create a new session or Existing Session to join existing one</Typography>
+            <Typography variant="h6">Please choose New Session to create a new session or Existing Session to join existing one.</Typography>
             <br />
             <Box display="flex">
                 <Box m={2}>
