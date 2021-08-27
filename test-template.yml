@@ -1,7 +1,7 @@
 parameters:
   -name: 'steps'
     type: stepList
-    default: [ ]
+    default: []
 
 jobs:
   - job: Build
