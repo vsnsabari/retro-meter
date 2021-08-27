@@ -9,7 +9,7 @@ jobs:
       - bash: |
           echo ${{join(' ', parameters.commands)}}
           echo done
-          for i in "${{parameters.commands}}"
+          for i in "${parameters.commands}"
           do
             echo $i
           done
