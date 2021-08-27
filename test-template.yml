@@ -8,5 +8,5 @@ jobs:
     steps:
       - bash: |
           for s in ${{ parameters.commands }}; do
-            echo ${join(' ', s)}
+
           done
