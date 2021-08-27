@@ -10,6 +10,7 @@ trigger:
  paths:
    exclude:
      - ui
+     - azure-pipelines-ui.yml
 
 
 pool:
