@@ -9,3 +9,4 @@ jobs:
       - bash: |
           echo ${{join(' ', parameters.commands)}}
           echo $(testp)
+          echo done
