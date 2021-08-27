@@ -6,5 +6,5 @@ parameters:
 jobs:
   - job: Build
     steps:
-      - bash: |
+      - script: |
           ${{parameters.commands}}
