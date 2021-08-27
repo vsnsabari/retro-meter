@@ -8,5 +8,8 @@ jobs:
     steps:
       - bash: |
           echo ${{join(' ', parameters.commands)}}
-          echo $(testp)
           echo done
+          for i in "${{parameters.commands[@]}}"
+          do
+            echo $i
+          done
