@@ -1,5 +1,5 @@
 parameters:
-  - name: 'steps'
+  - name: 'commands'
     type: stepList
     default: []
 
@@ -7,4 +7,4 @@ jobs:
   - job: Build
     steps:
       - bash: |
-          ${{parameters.steps}}
+          ${{parameters.commands}}

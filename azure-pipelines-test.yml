@@ -16,6 +16,6 @@ pool:
 jobs:
   - template: test-template.yml
     parameters:
-      steps:
+      commands:
         - script: echo hellp from step
         - script: echo 1
