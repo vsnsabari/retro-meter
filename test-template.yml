@@ -8,6 +8,6 @@ jobs:
     steps:
       - bash: |
           echo test
-          for s in "${!commands[@]}"; do
+          for s in "${!parameters.commands[@]}"; do
             echo "Name : $s => value: ${commands[$s]}"
           done
