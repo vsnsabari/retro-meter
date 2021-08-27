@@ -12,5 +12,5 @@ jobs:
       - bash: |
           if [[ ${{parameters.isOk}} ]]
           then
-            echo
+            echo dd
           fi
