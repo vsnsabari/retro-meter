@@ -7,4 +7,4 @@ jobs:
   - job: Build
     steps:
       - script: |
-          ${{parameters.commands}}
+          $(parameters.commands)
