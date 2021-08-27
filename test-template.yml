@@ -7,4 +7,6 @@ jobs:
   - job: Build
     steps:
       - bash: |
-          echo ${{ parameters.commands }}
+          for s in ${{ parameters.commands }}; do
+            echo $s
+          done
