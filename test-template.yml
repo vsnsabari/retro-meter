@@ -4,7 +4,7 @@ parameters:
     default: []
   - name: isOk
     type: boolean
-    default: false
+    default: true
 
 jobs:
   - job: Build
