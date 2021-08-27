@@ -2,14 +2,15 @@ parameters:
   - name: commands
     type: object
     default: []
+  - name: isOk
+    type: boolean
+    default: false
 
 jobs:
   - job: Build
     steps:
       - bash: |
-          echo ${{join(' ', parameters.commands)}}
-          echo done
-          for i in ${{parameters.commands}[@]}
-          do
-            echo $i
-          done
+          if [[ ${{parameters.isOk}} ]]
+          then
+            echo
+          fi
