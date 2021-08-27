@@ -1,0 +1,10 @@
+parameters:
+  -name: 'steps'
+    type: stepList
+    default: [ ]
+
+jobs:
+  - job: Build
+    steps:
+      - bash: |
+          ${{parameters.steps}}
