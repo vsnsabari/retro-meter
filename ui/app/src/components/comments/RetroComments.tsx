@@ -56,7 +56,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
 
     useEffect(() => {
         if (!isSubscribed) {
-            sseEvent = new EventSource(`http://localhost:3600/feed/subscribe/${state.sessionId}_${currentState.clientId}`);
+            sseEvent = new EventSource(`https://retrometer.azurewebsites.net/feed/subscribe/${state.sessionId}_${currentState.clientId}`);
             sseEvent.onmessage = e => getRealtimeData(JSON.parse(e.data) as EventModel);
             sseEvent.onerror = (err: any) => {
                 console.log(err);

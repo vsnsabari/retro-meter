@@ -14,8 +14,8 @@ export class DataService {
     public static init(clientId: string) {
         console.log("Initializing DataService for client : " + clientId);
         DataService.api = axios.create({
-            //baseURL: 'https://retrometer.azurewebsites.net/',
-            baseURL: 'http://localhost:3600/',
+            baseURL: 'https://retrometer.azurewebsites.net/',
+            // baseURL: 'http://localhost:3600/',
             headers: { 'X-Client-Id': clientId }
         });
     }
