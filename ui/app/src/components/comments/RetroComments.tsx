@@ -2,7 +2,7 @@ import { Grid, LinearProgress, withStyles, WithStyles } from '@material-ui/core'
 import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { eventBus } from '../../events/EventBus';
 import { CommentModel } from '../../models/CommentModel';
 import { CommentType } from '../../models/CommentType';
@@ -23,11 +23,21 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     const { state } = useLocation<SessionModel>();
     const [comments, setComments] = useState(new Array<CommentModel>());
     const [isLoading, setLoading] = useState(true);
+    const [isModalLoading, setModalLoading] = useState(false);
     const [isShowModal, setShowModal] = useState(false);
     const [currentType, setCurrentType] = useState(CommentType.NONE);
     const [isSubscribed, setSubscribed] = useState(false);
     let sseEvent: EventSource | undefined = undefined;
     const { currentState, dispatch } = useCurrentContext();
+    const [comment, setComment] = useState("");
+    const history = useHistory();
+
+    useEffect(() => {
+        if (currentState.session.sessionId === "") {
+            history.replace("/", null);
+            history.push('/');
+        }
+    }, []);
 
     useEffect(() => {
         async function fetchComments() {
@@ -39,12 +49,14 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     }, [state]);
 
     useEffect(() => {
-        dispatch({ type: "SESSION", data: { ...currentState, session: state } });
+        if (currentState.session.sessionId !== "") {
+            dispatch({ type: "SESSION", data: { ...currentState, session: state } });
+        }
     }, [state]);
 
     useEffect(() => {
         if (!isSubscribed) {
-            sseEvent = new EventSource(`https://retrometer.azurewebsites.net/feed/subscribe/${state.sessionId}_${currentState.clientId}`);
+            sseEvent = new EventSource(`http://localhost:3600/feed/subscribe/${state.sessionId}_${currentState.clientId}`);
             sseEvent.onmessage = e => getRealtimeData(JSON.parse(e.data) as EventModel);
             sseEvent.onerror = (err: any) => {
                 console.log(err);
@@ -95,6 +107,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     }
 
     const handleSubmit = async (comment: string) => {
+        setModalLoading(true);
         const reqParams = {
             "sessionId": state.sessionId,
             "commentText": comment,
@@ -102,8 +115,9 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
             "commentType": CommentType[currentType.toString() as keyof typeof CommentType]
         }
         await DataService.addComment(reqParams).then(res => {
+            setModalLoading(false);
             setShowModal(false);
-            setComments([...comments, res])
+            setComments([...comments, res]);
         });
     }
 
@@ -144,7 +158,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
                             onAdd={() => handleOnCommentAdd(CommentType.IMPROVE)} onCommentDelete={handleCommentDelete} />
                     </Grid>
                 </Grid>}
-            <RetroCommentModal show={isShowModal} comment="" onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
+            <RetroCommentModal key="add" show={isShowModal} comment={comment} isNew={true} onSubmit={handleSubmit} onClose={handleClose} isLoading={isModalLoading} />
         </div >
     );
 }

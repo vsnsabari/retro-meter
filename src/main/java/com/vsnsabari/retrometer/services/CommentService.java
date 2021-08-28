@@ -78,18 +78,18 @@ public class CommentService {
         }
     }
 
-    public Comment addUpVote(long commentId, String clientId) {
+    public synchronized Comment addRemoveLikes(long commentId, String clientId, boolean isAdd) {
         var comment = getComment(commentId);
-        comment.setUpVotes(comment.getUpVotes() + 1);
+        comment.setLikes(isAdd ? comment.getLikes() + 1 : comment.getLikes() - 1);
         var editedComment = editComment(comment);
         notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
                 new EventDto(EventType.EDITED, editedComment));
         return editedComment;
     }
 
-    public Comment addDownVote(long commentId, String clientId) {
+    public synchronized Comment addRemoveActionItem(long commentId, String clientId, boolean isAdd) {
         var comment = getComment(commentId);
-        comment.setDownVotes(comment.getDownVotes() + 1);
+        comment.setActionItem(isAdd);
         var editedComment = editComment(comment);
         notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
                 new EventDto(EventType.EDITED, editedComment));

@@ -34,8 +34,8 @@ public class Comment implements Serializable {
     private String addedBy;
     @Convert(converter = CommentTypeConverter.class)
     private CommentType commentType;
-    private int upVotes = 0;
-    private int downVotes = 0;
+    private int likes = 0;
+    private boolean isActionItem = false;
     @JsonSerialize(using = ToStringSerializer.class)
     private LocalDateTime createdDate = LocalDateTime.now();
 }

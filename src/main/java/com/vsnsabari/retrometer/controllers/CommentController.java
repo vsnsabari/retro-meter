@@ -33,7 +33,7 @@ public class CommentController {
     public ResponseEntity<Object> addComment(@RequestHeader(value = "X-Client-Id") String clientId,
                                              @RequestBody Comment comment) {
         try {
-            log.info("Received Request to create comment {} by client {}", comment , clientId);
+            log.info("Received Request to create comment {} by client {}", comment, clientId);
             return new ResponseEntity<>(commentService.addComment(comment, clientId), HttpStatus.CREATED);
         } catch (Exception ex) {
             log.error("Error processing request : {}", ex.getMessage());
@@ -67,33 +67,61 @@ public class CommentController {
         }
     }
 
-    @PostMapping("upvote/{commentId}")
-    public synchronized ResponseEntity<Object> addUpVote(@RequestHeader(value = "X-Client-Id") String clientId,
-                                                         @PathVariable("commentId") int commentId) {
-        try {
-            log.info("Received Request to up vote comment {} by client {}", commentId, clientId);
-            return new ResponseEntity<>(commentService.addUpVote(commentId, clientId), HttpStatus.OK);
-        } catch (CommentNotFoundException | CommentEditException ex) {
-            log.error("Error processing upvote request : {}", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-        }
-    }
-
-    @PostMapping("downvote/{commentId}")
-    public synchronized ResponseEntity<Object> addDownVote(@RequestHeader(value = "X-Client-Id") String clientId,
-                                                           @PathVariable("commentId") int commentId) {
-        try {
-            log.info("Received Request to down vote comment {} by client {}", commentId, clientId);
-            return new ResponseEntity<>(commentService.addDownVote(commentId, clientId), HttpStatus.OK);
-        } catch (CommentNotFoundException | CommentEditException ex) {
-            log.error("Error processing upvote request : {}", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-        }
-    }
-
     @GetMapping("getbysession/{sessionId}")
     public ResponseEntity<Object> getBySessionId(@PathVariable("sessionId") String sessionId) {
         log.info("Received Request to get comments by session {}", sessionId);
         return new ResponseEntity<>(commentService.getAllCommentBySessionId(sessionId), HttpStatus.OK);
+    }
+
+    @PostMapping("like/{commentId}")
+    public ResponseEntity<Object> like(@RequestHeader(value = "X-Client-Id") String clientId,
+                                            @PathVariable("commentId") int commentId) {
+        try {
+            log.info("Received Request to favourite comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addRemoveLikes(commentId, clientId, true),
+                    HttpStatus.OK);
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing favourite request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("unlike/{commentId}")
+    public ResponseEntity<Object> unlike(@RequestHeader(value = "X-Client-Id") String clientId,
+                                            @PathVariable("commentId") int commentId) {
+        try {
+            log.info("Received Request to favourite comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addRemoveLikes(commentId, clientId, false),
+                    HttpStatus.OK);
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing favourite request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("action/add/{commentId}")
+    public ResponseEntity<Object> actionItem(@RequestHeader(value = "X-Client-Id") String clientId,
+                                              @PathVariable("commentId") int commentId) {
+        try {
+            log.info("Received Request to mark as action comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addRemoveActionItem(commentId, clientId, true),
+                    HttpStatus.OK);
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing mark as action request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("action/remove/{commentId}")
+    public ResponseEntity<Object> nonActionItem(@RequestHeader(value = "X-Client-Id") String clientId,
+                                         @PathVariable("commentId") int commentId) {
+        try {
+            log.info("Received Request to remove as action comment {} by client {}", commentId, clientId);
+            return new ResponseEntity<>(commentService.addRemoveActionItem(commentId, clientId, false),
+                    HttpStatus.OK);
+        } catch (CommentNotFoundException | CommentEditException ex) {
+            log.error("Error processing to remove as action request : {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
     }
 }

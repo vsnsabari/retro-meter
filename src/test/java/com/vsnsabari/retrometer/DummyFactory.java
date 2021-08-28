@@ -23,8 +23,8 @@ public class DummyFactory {
                 .sessionId(sessionId)
                 .addedBy(name)
                 .commentType(CommentType.GOOD)
-                .downVotes(0)
-                .upVotes(0)
+                .likes(0)
+                .isActionItem(false)
                 .build();
     }
 }

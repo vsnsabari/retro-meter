@@ -14,7 +14,8 @@ export class DataService {
     public static init(clientId: string) {
         console.log("Initializing DataService for client : " + clientId);
         DataService.api = axios.create({
-            baseURL: 'https://retrometer.azurewebsites.net/',
+            //baseURL: 'https://retrometer.azurewebsites.net/',
+            baseURL: 'http://localhost:3600/',
             headers: { 'X-Client-Id': clientId }
         });
     }
@@ -51,13 +52,30 @@ export class DataService {
         return response.data as CommentModel;
     }
 
-    public static async upVoteComment(commentId: number) {
-        const response = await DataService.api.post(`comment/upvote/${commentId}`);
+    public static async like(commentId: number) {
+        const response = await DataService.api.post(`comment/like/${commentId}`);
         return response.data as CommentModel;
     }
 
-    public static async downVoteComment(commentId: number) {
-        const response = await DataService.api.post(`comment/downvote/${commentId}`);
+    public static async unlike(commentId: number) {
+        const response = await DataService.api.post(`comment/unlike/${commentId}`);
         return response.data as CommentModel;
+    }
+
+    public static async addAsActionItem(commentId: number) {
+        const response = await DataService.api.post(`comment/action/add/${commentId}`);
+        console.log(response.data);
+        return response.data as CommentModel;
+    }
+
+    public static async removeActionItem(commentId: number) {
+        const response = await DataService.api.post(`comment/action/remove/${commentId}`);
+        console.log(response.data);
+        return response.data as CommentModel;
+    }
+
+    public static async removeEventSubscribtion(sessionId: string): Promise<boolean> {
+        const response = await DataService.api.post(`feed/unsubscribe/${sessionId}`);
+        return response.data as boolean;
     }
 }

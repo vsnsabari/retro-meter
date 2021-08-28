@@ -5,7 +5,7 @@ export class CommentModel {
     public commentText: string = "";
     public sessionId: string = "";
     public commentType: CommentType = CommentType.NONE;
-    public upVotes: number = 0;
-    public downVotes: number = 0;
+    public likes: number = 0;
+    public actionItem: boolean = false;
     public createdDate: Date = new Date();
 }

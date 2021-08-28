@@ -78,11 +78,11 @@ public class CommentControllerTest {
 
     @Test
     @SneakyThrows
-    void addUpVote() {
+    void like() {
         Comment testComment = getTestComments().get(0);
         Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
-        Mockito.when(service.addUpVote(anyLong(), anyString())).thenReturn(testComment);
-        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/upvote/%s", testComment.getId()))
+        Mockito.when(service.addRemoveLikes(anyLong(), anyString(), eq(true))).thenReturn(testComment);
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/like/%s", testComment.getId()))
                 .header("X-Client-Id", "client1")
                 .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
                 .andDo(print())
@@ -92,11 +92,38 @@ public class CommentControllerTest {
 
     @Test
     @SneakyThrows
-    void addDownVote() {
+    void unlike() {
         Comment testComment = getTestComments().get(0);
         Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
-        Mockito.when(service.addDownVote(anyLong(), anyString())).thenReturn(testComment);
-        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/downvote/%s", testComment.getId()))
+        Mockito.when(service.addRemoveLikes(anyLong(), anyString(), eq(false))).thenReturn(testComment);
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/unlike/%s", testComment.getId()))
+                .header("X-Client-Id", "client1")
+                .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JSON_MAPPER.writeValueAsString(testComment)));
+    }
+
+    @Test
+    @SneakyThrows
+    void actionItem() {
+        Comment testComment = getTestComments().get(0);
+        Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
+        Mockito.when(service.addRemoveActionItem(anyLong(), anyString(), eq(true))).thenReturn(testComment);
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/action/add/%s", testComment.getId()))
+                .header("X-Client-Id", "client1")
+                .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JSON_MAPPER.writeValueAsString(testComment)));
+    }
+
+    @SneakyThrows
+    void nonActionItem() {
+        Comment testComment = getTestComments().get(0);
+        Mockito.when(service.getComment(eq(testComment.getId()))).thenReturn(testComment);
+        Mockito.when(service.addRemoveActionItem(anyLong(), anyString(), eq(false))).thenReturn(testComment);
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/comment/action/remove/%s", testComment.getId()))
                 .header("X-Client-Id", "client1")
                 .contentType(MediaType.APPLICATION_JSON).content(JSON_MAPPER.writeValueAsString(testComment)))
                 .andDo(print())

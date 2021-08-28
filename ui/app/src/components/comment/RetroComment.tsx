@@ -1,5 +1,9 @@
 import { Badge, Card, CardActionArea, CardActions, CardContent, IconButton, Tooltip, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { ThumbUp as ThumbUpIcon, ThumbDown as ThumbDownIcon, Edit as EditIcon, Delete as DeleteIcon } from '@material-ui/icons'
+import {
+    Edit as EditIcon,
+    Delete as DeleteIcon, FavoriteBorder as LikeIcon, Favorite as LikedIcon,
+    Bookmark as ActionItemIcon, BookmarkBorder as NonActionItemIcon
+} from '@material-ui/icons'
 import { useEffect } from "react";
 import { Fragment, useState } from "react";
 import { eventBus } from "../../events/EventBus";
@@ -18,7 +22,7 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
     const [currentItem, setCurentItem] = useState(item);
     const [isShowModal, setShowModal] = useState(false);
     const [isLoading, setLoading] = useState(false);
-    const [isVoted, setVoted] = useState(false);
+    const [isLiked, setLiked] = useState(false);
     const [isListening, setListening] = useState(false);
 
     useEffect(() => {
@@ -36,16 +40,28 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
         }
     }, [isListening, currentItem]);
 
-    const handleVoting = async (isUp: boolean) => {
-        if (isUp) {
-            await DataService.upVoteComment(currentItem.id).then((res: CommentModel) => {
+    const handleLike = async () => {
+        if (!isLiked) {
+            await DataService.like(currentItem.id).then((res: CommentModel) => {
                 setCurentItem(res);
-                setVoted(true);
+                setLiked(true);
             });
         } else {
-            await DataService.downVoteComment(currentItem.id).then((res: CommentModel) => {
+            await DataService.unlike(currentItem.id).then((res: CommentModel) => {
                 setCurentItem(res);
-                setVoted(true);
+                setLiked(false);
+            });
+        }
+    }
+
+    const handleActionItem = async () => {
+        if (!currentItem.actionItem) {
+            await DataService.addAsActionItem(currentItem.id).then((res: CommentModel) => {
+                setCurentItem(res);
+            });
+        } else {
+            await DataService.removeActionItem(currentItem.id).then((res: CommentModel) => {
+                setCurentItem(res);
             });
         }
     }
@@ -75,8 +91,8 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
     }
 
     return (
-        <Fragment>
-            <Card className={classes.root}>
+        <Fragment >
+            <Card className={classes.root} style={{ background: currentItem.actionItem ? "lightGreen" : "" }}>
                 <CardActionArea>
                     <CardContent>
                         <Tooltip title="click to copy" placement="bottom-end">
@@ -87,25 +103,23 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
                     </CardContent>
                 </CardActionArea>
                 <CardActions disableSpacing>
-                    <IconButton onClick={() => handleVoting(true)} disabled={isVoted}>
-                        <Badge className={classes.badge} badgeContent={currentItem.upVotes} color="secondary">
-                            <ThumbUpIcon />
+                    <IconButton onClick={handleLike}>
+                        <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
+                            {isLiked ? <LikedIcon /> : <LikeIcon />}
                         </Badge>
                     </IconButton>
-                    <IconButton onClick={() => handleVoting(false)} disabled={isVoted}>
-                        <Badge className={classes.badge} badgeContent={currentItem.downVotes} color="secondary">
-                            <ThumbDownIcon />
-                        </Badge>
+                    <IconButton onClick={handleActionItem}>
+                        {currentItem.actionItem ? <ActionItemIcon /> : <NonActionItemIcon />}
                     </IconButton>
                     <IconButton onClick={handleEdit}>
                         <EditIcon />
                     </IconButton>
-                    <IconButton onClick={handleDelete}>
+                    <IconButton onClick={handleDelete} >
                         <DeleteIcon />
                     </IconButton>
                 </CardActions>
             </Card>
-            <RetroCommentModal show={isShowModal} comment={currentItem.commentText} onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
+            <RetroCommentModal key="edit" show={isShowModal} comment={currentItem.commentText} isNew={false} onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
         </Fragment >
     );
 };

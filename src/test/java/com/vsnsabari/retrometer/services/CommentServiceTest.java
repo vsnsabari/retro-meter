@@ -65,12 +65,12 @@ public class CommentServiceTest {
         var session = sessionService.createSession(DummyFactory.getTestSession("editComment"));
         var testComment = DummyFactory.getTestComment("editComment", session.getSessionId());
         var comment = service.addComment(testComment, "client1");
-        comment.setUpVotes(15);
-        comment.setDownVotes(17);
+        comment.setLikes(3);
+        comment.setActionItem(true);
         comment = service.editComment(comment);
         assertNotNull(comment);
-        MatcherAssert.assertThat(comment, Matchers.hasProperty("upVotes", equalTo(15)));
-        MatcherAssert.assertThat(comment, Matchers.hasProperty("downVotes", equalTo(17)));
+        MatcherAssert.assertThat(comment.getLikes(), equalTo(3));
+        MatcherAssert.assertThat(comment.isActionItem(), equalTo(true));
     }
 
     @Test
@@ -90,27 +90,50 @@ public class CommentServiceTest {
         comment.setCommentText("new comment");
         comment = service.editComment(comment);
         assertNotNull(comment);
-        MatcherAssert.assertThat(comment, Matchers.hasProperty("commentText", equalTo("new comment")));
+        MatcherAssert.assertThat(comment.getCommentText(), equalTo("new comment"));
     }
 
     @Test
-    void addUpVote() {
-        var session = sessionService.createSession(DummyFactory.getTestSession("addUpVote"));
-        var testComment = DummyFactory.getTestComment("addUpVote", session.getSessionId());
+    void like() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("like"));
+        var testComment = DummyFactory.getTestComment("like", session.getSessionId());
         var comment = service.addComment(testComment, "client1");
-        comment = service.addUpVote(testComment.getId(), "client1");
+        comment = service.addRemoveLikes(testComment.getId(), "client1", true);
         assertNotNull(comment);
-        MatcherAssert.assertThat(comment, Matchers.hasProperty("upVotes", equalTo(1)));
+        MatcherAssert.assertThat(comment.getLikes(), equalTo(1));
     }
 
     @Test
-    void addDownVote() {
-        var session = sessionService.createSession(DummyFactory.getTestSession("addDownVote"));
-        var testComment = DummyFactory.getTestComment("addDownVote", session.getSessionId());
+    void unlike() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("unlike"));
+        var testComment = DummyFactory.getTestComment("unlike", session.getSessionId());
+        testComment.setLikes(10);
         var comment = service.addComment(testComment, "client1");
-        comment = service.addDownVote(testComment.getId(), "client1");
+        comment = service.addRemoveLikes(testComment.getId(), "client1", false);
         assertNotNull(comment);
-        MatcherAssert.assertThat(comment, Matchers.hasProperty("downVotes", equalTo(1)));
+        MatcherAssert.assertThat(comment.getLikes(), equalTo(9));
+    }
+
+    @Test
+    void actionItem() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("actionItem"));
+        var testComment = DummyFactory.getTestComment("actionItem", session.getSessionId());
+        testComment.setLikes(10);
+        var comment = service.addComment(testComment, "client1");
+        comment = service.addRemoveActionItem(testComment.getId(), "client1", true);
+        assertNotNull(comment);
+        MatcherAssert.assertThat(comment.isActionItem(), equalTo(true));
+    }
+
+    @Test
+    void nonActionItem() {
+        var session = sessionService.createSession(DummyFactory.getTestSession("nonActionItem"));
+        var testComment = DummyFactory.getTestComment("nonActionItem", session.getSessionId());
+        testComment.setLikes(10);
+        var comment = service.addComment(testComment, "client1");
+        comment = service.addRemoveActionItem(testComment.getId(), "client1", false);
+        assertNotNull(comment);
+        MatcherAssert.assertThat(comment.isActionItem(), equalTo(false));
     }
 
     @Test

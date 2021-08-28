@@ -2,7 +2,6 @@ import {
     Button, CircularProgress, Dialog, DialogActions, DialogContent,
     DialogContentText, DialogTitle, TextareaAutosize, withStyles, WithStyles
 } from "@material-ui/core";
-import { useEffect } from "react";
 import { BaseSyntheticEvent, useState } from "react";
 import { commentStyles } from "./RetroComment.styles";
 
@@ -12,26 +11,24 @@ interface Props extends WithStyles<typeof commentStyles> {
     onSubmit: any;
     onClose: any;
     isLoading: boolean;
+    isNew: boolean;
 }
 
-const RetroCommentModal: React.FC<Props> = ({ classes, comment, show, onSubmit, onClose, isLoading }) => {
+const RetroCommentModal: React.FC<Props> = ({ classes, comment, show, onSubmit, onClose, isLoading, isNew }) => {
     const [currentComment, setCurrentComment] = useState(comment);
 
     const setTextValue = (event: BaseSyntheticEvent) => {
-        setCurrentComment(event.target.value);
+        setCurrentComment((event.target.value as string).trim());
     }
 
     const handleSumbit = () => {
         onSubmit(currentComment);
+        setCurrentComment(isNew ? "" : currentComment);
     }
 
     const handleClose = () => {
         onClose(false);
     }
-
-    useEffect(() => {
-        setCurrentComment(comment);
-    }, [comment]);
 
     return (
         <Dialog open={show} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={"sm"} fullWidth={true}>
@@ -47,7 +44,7 @@ const RetroCommentModal: React.FC<Props> = ({ classes, comment, show, onSubmit, 
                     minLength={5}
                     placeholder="add your comments here"
                     aria-label="maximum height"
-                    value={currentComment}
+                    value={currentComment.trim()}
                     onChange={(e) => setTextValue(e)}
                     className={classes.textArea}
                 />

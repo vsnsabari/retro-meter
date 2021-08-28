@@ -11,8 +11,8 @@ CREATE TABLE COMMENT (
   added_by CHAR(255) NOT NULL,
   comment_text varchar(MAX) NOT NULL,
   comment_type CHAR(1) NOT NULL,
-  up_votes int,
-  down_votes int,
+  likes int,
+  is_action_item bit NOT NULL,
   created_date DATETIME NOT NULL,
   CONSTRAINT fk_session_id FOREIGN KEY (session_id) REFERENCES SESSION (session_id)
 );

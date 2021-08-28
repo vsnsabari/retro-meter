@@ -11,9 +11,9 @@ CREATE TABLE `COMMENT` (
   `added_by` varchar(255) NOT NULL,
   `comment_text` varchar(MAX) NOT NULL,
   `comment_type` char(1) NOT NULL,
-  `up_votes` int DEFAULT 0,
-  `down_votes` int DEFAULT 0,
+  `likes` int DEFAULT 0,
   `created_date` DATETIME NOT NULL,
+  `is_action_item` bit DEFAULT 0,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_session_id` FOREIGN KEY (`session_id`) REFERENCES `SESSION` (`session_id`)
 );
