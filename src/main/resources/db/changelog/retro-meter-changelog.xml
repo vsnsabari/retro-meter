@@ -6,11 +6,11 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd"
         logicalFilePath="src/main/resources/db/chagelog/budgetme-changelog.xml">
 
-    <changeSet author="vsnsabari" id="1">
+    <changeSet author="vsnsabari" id="2">
         <sqlFile path="classpath:db/changelog/1-create-all-tables.sql" relativeToChangelogFile="false" dbms="mssql" />
     </changeSet>
 
-    <changeSet author="vsnsabari" id="1h2">
+    <changeSet author="vsnsabari" id="2h2">
         <sqlFile path="classpath:db/changelog/1-create-all-tables-h2.sql" relativeToChangelogFile="false" dbms="h2" />
     </changeSet>
 
