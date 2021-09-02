@@ -18,7 +18,7 @@ const RetroCommentModal: React.FC<Props> = ({ classes, comment, show, onSubmit, 
     const [currentComment, setCurrentComment] = useState(comment);
 
     const setTextValue = (event: BaseSyntheticEvent) => {
-        setCurrentComment((event.target.value as string).trim());
+        setCurrentComment(event.target.value);
     }
 
     const handleSumbit = () => {
@@ -44,7 +44,7 @@ const RetroCommentModal: React.FC<Props> = ({ classes, comment, show, onSubmit, 
                     minLength={5}
                     placeholder="add your comments here"
                     aria-label="maximum height"
-                    value={currentComment.trim()}
+                    value={currentComment}
                     onChange={(e) => setTextValue(e)}
                     className={classes.textArea}
                 />
