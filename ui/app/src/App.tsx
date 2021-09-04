@@ -1,6 +1,9 @@
 import './App.css';
-import { AppBar, createStyles, WithStyles, withStyles, Theme, Toolbar, Typography, IconButton, Tooltip, Box } from '@material-ui/core';
-import { Menu as MenuIcon, FileCopyRounded as FileCopyIcon, CameraAltRounded as CameraIcon, ExitToAppRounded as LogoutIcon } from '@material-ui/icons';
+import { AppBar, createStyles, WithStyles, withStyles, Theme, Toolbar, Typography, IconButton, Tooltip, Box, Menu, MenuItem } from '@material-ui/core';
+import {
+  Menu as MenuIcon, FileCopyRounded as FileCopyIcon, CameraAltRounded as CameraIcon, ExitToAppRounded as LogoutIcon,
+  SettingsRounded as SettingsIcon, ViewListRounded as ExcelIcon
+} from '@material-ui/icons';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import RetroComments from './components/comments/RetroComments';
 import { createRef, useCallback } from 'react';
@@ -11,6 +14,8 @@ import { useCurrentContext } from './components/context/ContextProvider';
 import { useLayoutEffect } from 'react';
 import { DataService } from './services/DataService';
 import { SessionModel } from './models/SessionModel';
+import { CSVLink } from 'react-csv';
+import { CommentModel } from './models/CommentModel';
 
 const useStyles = (theme: Theme) => createStyles({
   toolbar: theme.mixins.toolbar,
@@ -19,6 +24,10 @@ const useStyles = (theme: Theme) => createStyles({
     color: 'white',
     height: '60px'
   },
+  csvLinkText: {
+    textDecoration: 'none',
+    color: 'black'
+  }
 });
 
 interface Props extends WithStyles<typeof useStyles> {
@@ -28,6 +37,9 @@ function App(props: Props) {
   const ref = createRef();
   const { currentState: contextState, dispatch } = useCurrentContext();
   const history = useHistory();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [comments, setComments] = React.useState(new Array<CommentModel>());
 
   useLayoutEffect(() => {
     DataService.init(contextState.clientId);
@@ -58,6 +70,20 @@ function App(props: Props) {
     history.push('/');
   }
 
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const getComments = async () => {
+    await DataService.getCommentsForSession(contextState.session.sessionId).then(res => {
+      setComments(res);
+    });
+  }
+
   return (
     <div className="App" ref={ref as React.RefObject<HTMLDivElement>}>
       <header className="App-header">
@@ -68,14 +94,14 @@ function App(props: Props) {
             {/* <HeaderUserbox /> */}
             {contextState.session.sessionId !== "" ?
               <Box>
+                <Tooltip title="Options" placement="top-start">
+                  <IconButton onClick={handleMenu}>
+                    <SettingsIcon />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="copy session id" placement="top-start">
                   <IconButton onClick={() => navigator.clipboard.writeText(contextState.session.sessionId)}>
                     <FileCopyIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="take screen shot" placement="top-start">
-                  <IconButton onClick={onScreenShot}>
-                    <CameraIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Exit" placement="top-start">
@@ -95,6 +121,42 @@ function App(props: Props) {
           </Route>
         </Switch>
       </header>
+      <Menu
+        id="menu-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={onScreenShot}>
+          <IconButton>
+            <CameraIcon />
+          </IconButton>
+          Screenshot
+        </MenuItem>
+        <MenuItem>
+
+          <CSVLink data={comments} filename={contextState.session.sessionId + ".csv"} className={props.classes.csvLinkText} asyncOnClick={true}
+            onClick={async (event, done) => {
+              await DataService.getCommentsForSession(contextState.session.sessionId).then(res => {
+                setComments(res);
+                done();
+              });
+            }}>
+            <IconButton>
+              <ExcelIcon />
+            </IconButton> Export Excel
+          </CSVLink>
+        </MenuItem>
+      </Menu>
     </div >
   );
 }

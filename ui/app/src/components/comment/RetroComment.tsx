@@ -1,9 +1,10 @@
-import { Badge, Card, CardActionArea, CardActions, CardContent, IconButton, Tooltip, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { Badge, Box, Card, CardActionArea, CardActions, CardContent, Collapse, IconButton, Tooltip, Typography, withStyles, WithStyles } from "@material-ui/core";
 import {
     Edit as EditIcon,
     Delete as DeleteIcon, FavoriteBorder as LikeIcon, Favorite as LikedIcon,
-    Bookmark as ActionItemIcon, BookmarkBorder as NonActionItemIcon
+    Bookmark as ActionItemIcon, BookmarkBorder as NonActionItemIcon, ExpandMore as ExpandMoreIcon,
 } from '@material-ui/icons'
+import clsx from "clsx";
 import { useEffect } from "react";
 import { Fragment, useState } from "react";
 import { eventBus } from "../../events/EventBus";
@@ -24,6 +25,7 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
     const [isLoading, setLoading] = useState(false);
     const [isLiked, setLiked] = useState(false);
     const [isListening, setListening] = useState(false);
+    const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {
         if (!isListening) {
@@ -90,34 +92,52 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
         await navigator.clipboard.writeText(currentItem.commentText);
     }
 
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
+
     return (
         <Fragment >
             <Card className={classes.root} style={{ background: currentItem.actionItem ? "lightGreen" : "" }}>
                 <CardActionArea>
                     <CardContent>
-                        <Tooltip title="click to copy" placement="bottom-end">
-                            <Typography className={classes.cardContent} variant="body2" color="textSecondary" component="p" onClick={copyComment}>
-                                {currentItem.commentText}
-                            </Typography>
-                        </Tooltip>
+                        <Box display="flex">
+                            <Box flexGrow={1}>
+                                <Tooltip title="click to copy" placement="bottom-end">
+                                    <Typography className={classes.cardContent} variant="body2" color="textSecondary" component="p" onClick={copyComment}>
+                                        {currentItem.commentText}
+                                    </Typography>
+                                </Tooltip>
+                            </Box>
+                            <Box>
+                                <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
+
+                                    <IconButton className={clsx(classes.expand, { [classes.expandOpen]: expanded, })} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show actions">
+                                        <ExpandMoreIcon />
+                                    </IconButton>
+                                </Badge>
+                            </Box>
+                        </Box>
                     </CardContent>
                 </CardActionArea>
-                <CardActions disableSpacing>
-                    <IconButton onClick={handleLike}>
-                        <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
-                            {isLiked ? <LikedIcon /> : <LikeIcon />}
-                        </Badge>
-                    </IconButton>
-                    <IconButton onClick={handleActionItem}>
-                        {currentItem.actionItem ? <ActionItemIcon /> : <NonActionItemIcon />}
-                    </IconButton>
-                    <IconButton onClick={handleEdit}>
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={handleDelete} >
-                        <DeleteIcon />
-                    </IconButton>
-                </CardActions>
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <CardActions disableSpacing>
+                        <IconButton onClick={handleLike}>
+                            <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
+                                {isLiked ? <LikedIcon /> : <LikeIcon />}
+                            </Badge>
+                        </IconButton>
+                        <IconButton onClick={handleActionItem}>
+                            {currentItem.actionItem ? <ActionItemIcon /> : <NonActionItemIcon />}
+                        </IconButton>
+                        <IconButton onClick={handleEdit}>
+                            <EditIcon />
+                        </IconButton>
+                        <IconButton onClick={handleDelete} >
+                            <DeleteIcon />
+                        </IconButton>
+                    </CardActions>
+                </Collapse>
             </Card>
             <RetroCommentModal key="edit" show={isShowModal} comment={currentItem.commentText} isNew={false} onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
         </Fragment >
