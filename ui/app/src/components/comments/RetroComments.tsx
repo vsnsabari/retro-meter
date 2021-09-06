@@ -68,20 +68,19 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
             setSubscribed(false);
             sseEvent?.close();
         };
-
         function getRealtimeData(data: EventModel) {
             switch (data.type) {
                 case "ADDED":
                     console.log("ADDED");
-                    getComments();
+                    setComments((cData) => [...cData, data.comment]);
                     break;
                 case "EDITED":
                     console.log("EDITED");
-                    getComments();
+                    editComment(data.comment);
                     break;
                 case "REMOVED":
                     console.log("REMOVED");
-                    getComments();
+                    removeComment(data.comment.id);
                     break;
             }
         }
@@ -129,12 +128,14 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     }
 
     const removeComment = (id: number) => {
-        var items = [...comments];
-        var index = items.findIndex(c => c.id === id);
-        if (index !== -1) {
-            items.splice(index, 1);
-            setComments(items);
-        }
+        setComments((cData) => {
+            const items = [...cData];
+            const index = items.findIndex(c => c.id === id);
+            if (index !== -1) {
+                items.splice(index, 1);
+            }
+            return [...items];
+        });
     }
 
     const handleLike = async (id: number, isLike: boolean) => {
@@ -168,12 +169,14 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     }
 
     const editComment = (comment: CommentModel) => {
-        var items = [...comments];
-        var index = items.findIndex(c => c.id === comment.id);
-        if (index !== -1) {
-            items[index] = comment;
-            setComments(items);
-        }
+        setComments((cData) => {
+            const items = [...cData];
+            const index = items.findIndex(c => c.id === comment.id);
+            if (index !== -1) {
+                items[index] = comment;
+            }
+            return [...items];
+        });
     }
 
     return (
