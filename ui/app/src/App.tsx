@@ -6,7 +6,7 @@ import {
 } from '@material-ui/icons';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import RetroComments from './components/comments/RetroComments';
-import { createRef, useCallback } from 'react';
+import { createRef, useCallback, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import React from 'react';
 import Home from './components/home/Home';
@@ -35,6 +35,7 @@ interface Props extends WithStyles<typeof useStyles> {
 
 function App(props: Props) {
   const ref = createRef();
+  const csvLinkRef = useRef<CSVLink & HTMLAnchorElement & { link: HTMLAnchorElement }>(null);
   const { currentState: contextState, dispatch } = useCurrentContext();
   const history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -46,6 +47,7 @@ function App(props: Props) {
   }, [contextState.clientId]);
 
   const onScreenShot = useCallback(() => {
+    handleClose();
     if (ref.current === null) {
       return
     }
@@ -62,6 +64,15 @@ function App(props: Props) {
       })
   }, [ref, contextState.session.sessionId]);
 
+  const onExcelExport = async () => {
+    handleClose();
+    await DataService.getCommentsForSession(contextState.session.sessionId).then(res => {
+      setComments(res);
+      console.log("clicked")
+      csvLinkRef.current?.link.click();
+    });
+  }
+
   const onLogout = () => {
     DataService.removeEventSubscribtion(contextState.session.sessionId + "_" + contextState.clientId);
     dispatch({ type: "SESSION", data: { clientId: "", name: "", session: new SessionModel() } });
@@ -77,12 +88,6 @@ function App(props: Props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const getComments = async () => {
-    await DataService.getCommentsForSession(contextState.session.sessionId).then(res => {
-      setComments(res);
-    });
-  }
 
   return (
     <div className="App" ref={ref as React.RefObject<HTMLDivElement>}>
@@ -142,20 +147,12 @@ function App(props: Props) {
           </IconButton>
           Screenshot
         </MenuItem>
-        <MenuItem>
-
-          <CSVLink data={comments} filename={contextState.session.sessionId + ".csv"} className={props.classes.csvLinkText} asyncOnClick={true}
-            onClick={async (event, done) => {
-              await DataService.getCommentsForSession(contextState.session.sessionId).then(res => {
-                setComments(res);
-                done();
-              });
-            }}>
-            <IconButton>
-              <ExcelIcon />
-            </IconButton> Export Excel
-          </CSVLink>
+        <MenuItem onClick={onExcelExport}>
+          <IconButton>
+            <ExcelIcon />
+          </IconButton> Export Excel
         </MenuItem>
+        <CSVLink data={comments} ref={csvLinkRef} filename={contextState.session.sessionId + ".csv"} />
       </Menu>
     </div >
   );

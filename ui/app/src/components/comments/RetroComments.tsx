@@ -3,7 +3,6 @@ import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { eventBus } from '../../events/EventBus';
 import { CommentModel } from '../../models/CommentModel';
 import { CommentType } from '../../models/CommentType';
 import { EventModel } from '../../models/EventModel';
