@@ -11,9 +11,12 @@ interface Props extends WithStyles<typeof categoryStyles> {
     items: CommentModel[];
     onAdd: any;
     onCommentDelete: any;
+    onLike: any;
+    onActionItem: any;
+    onCommentEdit: any;
 }
 
-const RetroCategory: React.FC<Props> = ({ classes, title, type, items, onAdd, onCommentDelete }) => {
+const RetroCategory: React.FC<Props> = ({ classes, title, type, items, onAdd, onCommentDelete, onLike, onActionItem, onCommentEdit }) => {
 
     const getMoodIcon = (type: CommentType) => {
         switch (type) {
@@ -37,9 +40,9 @@ const RetroCategory: React.FC<Props> = ({ classes, title, type, items, onAdd, on
                     {title}
                 </Button>
             </Tooltip>
-            {items.map((item: CommentModel) => {
+            {items.sort((a, b) => a.likes > b.likes ? -1 : a.likes < b.likes ? 1 : 0).map((item: CommentModel) => {
                 return (
-                    <RetroComment item={item} onDelete={onCommentDelete} key={item.id} />
+                    <RetroComment item={item} onDelete={onCommentDelete} key={item.id} onLike={onLike} onActionItem={onActionItem} onCommentEdit={onCommentEdit} />
                 );
             })}
         </Container>

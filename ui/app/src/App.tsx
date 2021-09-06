@@ -55,10 +55,10 @@ function App(props: Props) {
         const link = document.createElement('a')
         link.download = contextState.session.sessionId + ".png";
         link.href = dataUrl
-        link.click()
+        link.click();
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
       })
   }, [ref, contextState.session.sessionId]);
 

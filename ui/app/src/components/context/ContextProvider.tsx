@@ -26,18 +26,21 @@ const defaultContext = {
 function contextReducer(state: State, action: Action) {
     switch (action.type) {
         case 'CLIENT_ID':
+            console.log("updating CLIENT_ID");
             return {
                 clientId: action.data.clientId,
                 name: state.name,
                 session: state.session
             }
         case 'NAME':
+            console.log("updating NAME");
             return {
                 clientId: state.clientId,
                 name: action.data.name,
                 session: state.session
             }
         case 'SESSION':
+            console.log("updating SESSION");
             return {
                 clientId: state.clientId,
                 name: state.name,

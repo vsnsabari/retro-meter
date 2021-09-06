@@ -5,66 +5,41 @@ import {
     Bookmark as ActionItemIcon, BookmarkBorder as NonActionItemIcon, ExpandMore as ExpandMoreIcon,
 } from '@material-ui/icons'
 import clsx from "clsx";
-import { useEffect } from "react";
 import { Fragment, useState } from "react";
-import { eventBus } from "../../events/EventBus";
 import { CommentModel } from "../../models/CommentModel";
-import { DataService } from "../../services/DataService";
 import RetroCommentModal from "./RetroComment.modal";
 import { commentStyles } from "./RetroComment.styles";
 
 interface Props extends WithStyles<typeof commentStyles> {
     item: CommentModel;
     onDelete: any;
+    onLike: any;
+    onActionItem: any;
+    onCommentEdit: any;
 }
 
-const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
+const RetroComment: React.FC<Props> = ({ item, classes, onDelete, onLike, onActionItem, onCommentEdit }) => {
 
-    const [currentItem, setCurentItem] = useState(item);
     const [isShowModal, setShowModal] = useState(false);
     const [isLoading, setLoading] = useState(false);
     const [isLiked, setLiked] = useState(false);
-    const [isListening, setListening] = useState(false);
     const [expanded, setExpanded] = useState(false);
-
-    useEffect(() => {
-        if (!isListening) {
-            eventBus.on("EDITED", (data: CommentModel) => {
-                if (currentItem.id === data.id) {
-                    setCurentItem(data);
-                    console.log(currentItem);
-                }
-            });
-            setListening(true);
-        }
-        return () => {
-            eventBus.remove("EDITED", null);
-        }
-    }, [isListening, currentItem]);
 
     const handleLike = async () => {
         if (!isLiked) {
-            await DataService.like(currentItem.id).then((res: CommentModel) => {
-                setCurentItem(res);
-                setLiked(true);
-            });
+            onLike(item.id, true);
+            setLiked(true);
         } else {
-            await DataService.unlike(currentItem.id).then((res: CommentModel) => {
-                setCurentItem(res);
-                setLiked(false);
-            });
+            onLike(item.id, false);
+            setLiked(false);
         }
     }
 
     const handleActionItem = async () => {
-        if (!currentItem.actionItem) {
-            await DataService.addAsActionItem(currentItem.id).then((res: CommentModel) => {
-                setCurentItem(res);
-            });
+        if (!item.actionItem) {
+            onActionItem(item.id, true);
         } else {
-            await DataService.removeActionItem(currentItem.id).then((res: CommentModel) => {
-                setCurentItem(res);
-            });
+            onActionItem(item.id, false);
         }
     }
 
@@ -73,7 +48,7 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
     }
 
     const handleDelete = async () => {
-        onDelete(currentItem.id);
+        onDelete(item.id);
     }
 
     const handleClose = () => {
@@ -81,15 +56,13 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
     }
 
     const handleSubmit = async (comment: string) => {
-        await DataService.editComment({ id: currentItem.id, commentText: comment }).then(res => {
-            setLoading(false);
-            setShowModal(false);
-            setCurentItem(res);
-        });
+        onCommentEdit(item.id, comment);
+        setLoading(false);
+        setShowModal(false);
     }
 
     const copyComment = async () => {
-        await navigator.clipboard.writeText(currentItem.commentText);
+        await navigator.clipboard.writeText(item.commentText);
     }
 
     const handleExpandClick = () => {
@@ -98,19 +71,19 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
 
     return (
         <Fragment >
-            <Card className={classes.root} style={{ background: currentItem.actionItem ? "lightGreen" : "" }}>
+            <Card className={classes.root} style={{ background: item.actionItem ? "lightGreen" : "" }}>
                 <CardActionArea>
                     <CardContent>
                         <Box display="flex">
                             <Box flexGrow={1}>
                                 <Tooltip title="click to copy" placement="bottom-end">
                                     <Typography className={classes.cardContent} variant="body2" color="textSecondary" component="p" onClick={copyComment}>
-                                        {currentItem.commentText}
+                                        {item.commentText}
                                     </Typography>
                                 </Tooltip>
                             </Box>
                             <Box>
-                                <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
+                                <Badge className={classes.badge} badgeContent={item.likes} color="secondary">
 
                                     <IconButton className={clsx(classes.expand, { [classes.expandOpen]: expanded, })} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show actions">
                                         <ExpandMoreIcon />
@@ -123,12 +96,12 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardActions disableSpacing>
                         <IconButton onClick={handleLike}>
-                            <Badge className={classes.badge} badgeContent={currentItem.likes} color="secondary">
+                            <Badge className={classes.badge} badgeContent={item.likes} color="secondary">
                                 {isLiked ? <LikedIcon /> : <LikeIcon />}
                             </Badge>
                         </IconButton>
                         <IconButton onClick={handleActionItem}>
-                            {currentItem.actionItem ? <ActionItemIcon /> : <NonActionItemIcon />}
+                            {item.actionItem ? <ActionItemIcon /> : <NonActionItemIcon />}
                         </IconButton>
                         <IconButton onClick={handleEdit}>
                             <EditIcon />
@@ -139,7 +112,7 @@ const RetroComment: React.FC<Props> = ({ item, classes, onDelete }) => {
                     </CardActions>
                 </Collapse>
             </Card>
-            <RetroCommentModal key="edit" show={isShowModal} comment={currentItem.commentText} isNew={false} onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
+            <RetroCommentModal key="edit" show={isShowModal} comment={item.commentText} isNew={false} onSubmit={handleSubmit} onClose={handleClose} isLoading={isLoading} />
         </Fragment >
     );
 };

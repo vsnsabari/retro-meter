@@ -78,7 +78,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
                     break;
                 case "EDITED":
                     console.log("EDITED");
-                    eventBus.dispatch("EDITED", data.comment);
+                    getComments();
                     break;
                 case "REMOVED":
                     console.log("REMOVED");
@@ -138,6 +138,45 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
         }
     }
 
+    const handleLike = async (id: number, isLike: boolean) => {
+        if (!isLike) {
+            await DataService.unlike(id).then((res: CommentModel) => {
+                editComment(res);
+            });
+        } else {
+            await DataService.like(id).then((res: CommentModel) => {
+                editComment(res);
+            });
+        }
+    }
+
+    const handleActionItem = async (id: number, isActionItem: boolean) => {
+        if (!isActionItem) {
+            await DataService.removeActionItem(id).then((res: CommentModel) => {
+                editComment(res);
+            });
+        } else {
+            await DataService.addAsActionItem(id).then((res: CommentModel) => {
+                editComment(res);
+            });
+        }
+    }
+
+    const handleCommentEdit = async (id: number, comment: string) => {
+        await DataService.editComment({ id: id, commentText: comment }).then(res => {
+            editComment(res);
+        });
+    }
+
+    const editComment = (comment: CommentModel) => {
+        var items = [...comments];
+        var index = items.findIndex(c => c.id === comment.id);
+        if (index !== -1) {
+            items[index] = comment;
+            setComments(items);
+        }
+    }
+
     return (
         <div>
             {isLoading ? <LinearProgress /> :
@@ -145,17 +184,20 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
                     <Grid item md={3} lg={4} xs={12}>
                         <RetroCategory key="GOOD" title="What went good"
                             type={CommentType.GOOD} items={comments.filter(c => c.commentType.toString() === CommentType[CommentType.GOOD])}
-                            onAdd={() => handleOnCommentAdd(CommentType.GOOD)} onCommentDelete={handleCommentDelete} />
+                            onAdd={() => handleOnCommentAdd(CommentType.GOOD)} onCommentDelete={handleCommentDelete}
+                            onLike={handleLike} onActionItem={handleActionItem} onCommentEdit={handleCommentEdit} />
                     </Grid>
                     <Grid item md={3} lg={4} xs={12}>
                         <RetroCategory key="BAD" title="What went wrong"
                             type={CommentType.BAD} items={comments.filter(c => c.commentType.toString() === CommentType[CommentType.BAD])}
-                            onAdd={() => handleOnCommentAdd(CommentType.BAD)} onCommentDelete={handleCommentDelete} />
+                            onAdd={() => handleOnCommentAdd(CommentType.BAD)} onCommentDelete={handleCommentDelete}
+                            onLike={handleLike} onActionItem={handleActionItem} onCommentEdit={handleCommentEdit} />
                     </Grid>
                     <Grid item md={3} lg={4} xs={12}>
                         <RetroCategory key="IMPROVE" title="What can be improved"
                             type={CommentType.IMPROVE} items={comments.filter(c => c.commentType.toString() === CommentType[CommentType.IMPROVE])}
-                            onAdd={() => handleOnCommentAdd(CommentType.IMPROVE)} onCommentDelete={handleCommentDelete} />
+                            onAdd={() => handleOnCommentAdd(CommentType.IMPROVE)} onCommentDelete={handleCommentDelete}
+                            onLike={handleLike} onActionItem={handleActionItem} onCommentEdit={handleCommentEdit} />
                     </Grid>
                 </Grid>}
             <RetroCommentModal key="add" show={isShowModal} comment={comment} isNew={true} onSubmit={handleSubmit} onClose={handleClose} isLoading={isModalLoading} />
