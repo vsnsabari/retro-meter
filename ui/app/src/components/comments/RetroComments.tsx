@@ -56,7 +56,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     useEffect(() => {
         if (!isSubscribed) {
             client.configure({
-                brokerURL: 'ws://localhost:3600/retro-updates',
+                brokerURL: 'ws://retrometer.azurewebsites.net/retro-updates',
                 onConnect: () => {
                     console.log("connected");
                     client.subscribe(`/topic/comment/${state.sessionId}`, eventMsg => {
