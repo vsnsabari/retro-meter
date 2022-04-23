@@ -119,7 +119,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
         await DataService.addComment(reqParams).then(res => {
             setModalLoading(false);
             setShowModal(false);
-            setComments([...comments, res]);
+            //setComments([...comments, res]);
         });
     }
 
