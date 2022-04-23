@@ -10,26 +10,24 @@ import com.vsnsabari.retrometer.exceptions.CommentEditException;
 import com.vsnsabari.retrometer.exceptions.CommentNotFoundException;
 import com.vsnsabari.retrometer.models.EventDto;
 import com.vsnsabari.retrometer.models.EventType;
-import com.vsnsabari.retrometer.models.Member;
 import com.vsnsabari.retrometer.repositories.CommentRepository;
 
 @Service
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final NotificationService notificationService;
+    private final SendUpdateService sendUpdateService;
 
-    public CommentService(CommentRepository commentRepository, NotificationService notificationService) {
+    public CommentService(CommentRepository commentRepository, SendUpdateService sendUpdateService) {
 
         this.commentRepository = commentRepository;
-        this.notificationService = notificationService;
+        this.sendUpdateService = sendUpdateService;
     }
 
     public Comment addComment(Comment comment, String clientId) {
         try {
             var commentAdded = commentRepository.save(comment);
-            notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
-                    new EventDto(EventType.ADDED, commentAdded));
+            sendUpdateService.sendCommentUpdate(comment.getSessionId(), new EventDto(EventType.ADDED, commentAdded));
             return commentAdded;
         } catch (Exception ex) {
             throw new CommentCreationException(ex);
@@ -59,7 +57,7 @@ public class CommentService {
             var currentComment = getComment(commentId);
             currentComment.setCommentText(comment);
             var editedComment = commentRepository.save(currentComment);
-            notificationService.sendNotification(new Member(currentComment.getSessionId(), clientId),
+            sendUpdateService.sendCommentUpdate(currentComment.getSessionId(),
                     new EventDto(EventType.EDITED, editedComment));
             return editedComment;
         } catch (Exception ex) {
@@ -71,8 +69,7 @@ public class CommentService {
         try {
             var comment = getComment(commentId);
             commentRepository.deleteById(commentId);
-            notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
-                    new EventDto(EventType.REMOVED, comment));
+            sendUpdateService.sendCommentUpdate(comment.getSessionId(), new EventDto(EventType.REMOVED, comment));
         } catch (Exception ex) {
             throw new CommentNotFoundException(commentId);
         }
@@ -82,8 +79,7 @@ public class CommentService {
         var comment = getComment(commentId);
         comment.setLikes(isAdd ? comment.getLikes() + 1 : comment.getLikes() - 1);
         var editedComment = editComment(comment);
-        notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
-                new EventDto(EventType.EDITED, editedComment));
+        sendUpdateService.sendCommentUpdate(comment.getSessionId(), new EventDto(EventType.EDITED, editedComment));
         return editedComment;
     }
 
@@ -91,8 +87,7 @@ public class CommentService {
         var comment = getComment(commentId);
         comment.setActionItem(isAdd);
         var editedComment = editComment(comment);
-        notificationService.sendNotification(new Member(comment.getSessionId(), clientId),
-                new EventDto(EventType.EDITED, editedComment));
+        sendUpdateService.sendCommentUpdate(comment.getSessionId(), new EventDto(EventType.EDITED, editedComment));
         return editedComment;
     }
 }

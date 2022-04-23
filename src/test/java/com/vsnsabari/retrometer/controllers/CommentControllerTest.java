@@ -31,9 +31,8 @@ import com.vsnsabari.retrometer.DummyFactory;
 import com.vsnsabari.retrometer.config.WebSecurityConfig;
 import com.vsnsabari.retrometer.entities.Comment;
 import com.vsnsabari.retrometer.models.EventDto;
-import com.vsnsabari.retrometer.models.Member;
 import com.vsnsabari.retrometer.services.CommentService;
-import com.vsnsabari.retrometer.services.NotificationService;
+import com.vsnsabari.retrometer.services.SendUpdateService;
 
 @WebMvcTest(CommentController.class)
 @Import(WebSecurityConfig.class)
@@ -46,7 +45,7 @@ public class CommentControllerTest {
     private CommentService service;
 
     @MockBean
-    private NotificationService notificationService;
+    private SendUpdateService sendUpdateService;
 
     @InjectMocks
     private CommentController controller;
@@ -60,7 +59,7 @@ public class CommentControllerTest {
 
     @BeforeEach
     public void testSetup() {
-        Mockito.doNothing().when(notificationService).sendNotification(any(Member.class), any(EventDto.class));
+        Mockito.doNothing().when(sendUpdateService).sendCommentUpdate(anyString(), any(EventDto.class));
     }
 
     @Test

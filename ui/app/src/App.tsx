@@ -74,7 +74,6 @@ function App(props: Props) {
   }
 
   const onLogout = () => {
-    DataService.removeEventSubscribtion(contextState.session.sessionId + "_" + contextState.clientId);
     dispatch({ type: "SESSION", data: { clientId: "", name: "", session: new SessionModel() } });
     dispatch({ type: "CLIENT_ID", data: { clientId: "", name: "", session: new SessionModel() } });
     dispatch({ type: "NAME", data: { clientId: "", name: "", session: new SessionModel() } });

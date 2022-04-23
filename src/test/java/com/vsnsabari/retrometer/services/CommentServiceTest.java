@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -28,7 +27,7 @@ import com.vsnsabari.retrometer.repositories.CommentRepository;
 @Transactional
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({CommentService.class, SessionService.class, MockNotificationServiceImpl.class})
+@Import({CommentService.class, SessionService.class, MockSendUpdateServiceImpl.class})
 public class CommentServiceTest {
 
     @Autowired
@@ -39,6 +38,9 @@ public class CommentServiceTest {
 
     @Autowired
     private CommentRepository repository;
+
+    @Autowired
+    private SendUpdateService sendUpdateService;
 
     @Test
     void addComment() {

@@ -90,7 +90,7 @@ const Home: React.FC<Props> = (props) => {
                 <DialogTitle id="form-dialog-title">{isNewSession ? "New" : "Existing"} Session</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {isNewSession ? "To start a new session, please prove your name and team" : "To join existing session, please provide session id"}
+                        {isNewSession ? "To start a new session, please provide your name and team" : "To join existing session, please provide session id"}
                     </DialogContentText>
                     <TextField
                         autoFocus

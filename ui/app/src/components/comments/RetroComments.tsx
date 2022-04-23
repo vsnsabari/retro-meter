@@ -1,11 +1,11 @@
 import { Grid, LinearProgress, withStyles, WithStyles } from '@material-ui/core';
+import { Client } from '@stomp/stompjs';
 import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CommentModel } from '../../models/CommentModel';
 import { CommentType } from '../../models/CommentType';
-import { EventModel } from '../../models/EventModel';
 import { SessionModel } from '../../models/SessionModel';
 import { DataService } from '../../services/DataService';
 import RetroCategory from '../category/RetroCategory';
@@ -26,7 +26,7 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
     const [isShowModal, setShowModal] = useState(false);
     const [currentType, setCurrentType] = useState(CommentType.NONE);
     const [isSubscribed, setSubscribed] = useState(false);
-    let sseEvent: EventSource | undefined = undefined;
+    let client = new Client();
     const { currentState, dispatch } = useCurrentContext();
     const [comment, setComment] = useState("");
     const history = useHistory();
@@ -55,36 +55,40 @@ const RetroComments: React.FC<Props> = ({ classes }) => {
 
     useEffect(() => {
         if (!isSubscribed) {
-            sseEvent = new EventSource(`https://retrometer.azurewebsites.net/feed/subscribe/${state.sessionId}_${currentState.clientId}`);
-            sseEvent.onmessage = e => getRealtimeData(JSON.parse(e.data) as EventModel);
-            sseEvent.onerror = (err: any) => {
-                console.log(err);
-                setSubscribed(false);
-                sseEvent?.close();
-            }
+            client.configure({
+                brokerURL: 'ws://localhost:3600/retro-updates',
+                onConnect: () => {
+                    console.log("connected");
+                    client.subscribe(`/topic/comment/${state.sessionId}`, eventMsg => {
+                        console.log(eventMsg);
+                        const data = JSON.parse(eventMsg.body);
+                        switch (data.type) {
+                            case "ADDED":
+                                console.log("ADDED");
+                                setComments((cData) => [...cData, data.comment]);
+                                break;
+                            case "EDITED":
+                                console.log("EDITED");
+                                editComment(data.comment);
+                                break;
+                            case "REMOVED":
+                                console.log("REMOVED");
+                                removeComment(data.comment.id);
+                                break;
+                        }
+                    });
+                },
+                debug: (str) => {
+                    console.log(new Date(), str);
+                }
+            });
+            client.activate();
             setSubscribed(true);
         }
         return () => {
             setSubscribed(false);
-            sseEvent?.close();
+            client?.deactivate();
         };
-        function getRealtimeData(data: EventModel) {
-            switch (data.type) {
-                case "ADDED":
-                    console.log("ADDED");
-                    setComments((cData) => [...cData, data.comment]);
-                    break;
-                case "EDITED":
-                    console.log("EDITED");
-                    editComment(data.comment);
-                    break;
-                case "REMOVED":
-                    console.log("REMOVED");
-                    removeComment(data.comment.id);
-                    break;
-            }
-        }
-
     }, []);
 
     const getComments = async () => {
