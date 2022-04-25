@@ -1,9 +1,9 @@
-#RETRO-METER
+# RETRO-METER
 
-##Retrospective 
+## Retrospective 
 Identify how to improve teamwork by reflecting on what worked, what didn’t, and why. Usually Retrospective sessions are conducted at the sprint ending or completion of a project milestone.
 
-##Scope
+## Scope
 This application facilitates retrospective sessions, that eases the overall process of conducting the retrospective.
 
 ## How to conduct
